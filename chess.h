@@ -4,6 +4,7 @@
 #include <stack>
 #include <string>
 #include <cmath>
+#include <unordered_map>
 
 #define BCONT 0
 #define WCONT 1
@@ -28,12 +29,15 @@ relative piece strengths:
 
 struct piece {
     char ID;
-    std::string color;
+    std::string color = " ";
     bool canDoubleMove;
 };
 
-std::stack<std::string> moves; // used to check for three-fold repetition
-piece theBoard[8][8], cBoard[8][8];
+std::stack<std::string> moves;
+std::unordered_map <std::string , int> moves2;
+std::string boardState;
+piece board[8][8], cBoard[8][8];
+bool gameOver = false;
 
 struct player {
     int pCount = 8; // number of remaining pawns
@@ -45,7 +49,7 @@ struct player {
 
 player white, black;
 
-void boardSetup(piece board[][8]) {
+void boardSetup() {
     white.color= "White";
     white.KX = 3;
     white.KY = 7;
@@ -86,9 +90,16 @@ void boardSetup(piece board[][8]) {
     board[0][4].ID = 'K';
     board[7][3].ID = 'Q';
     board[7][4].ID = 'K';
+
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            boardState.push_back(board[i][j].ID);
+        }
+    }
+    moves2[boardState]++;
 }
 
-void showBoard(piece board[][8]) {
+void showBoard() {
     std::cout << "---------------------------------\n" <<
               "| " << board[0][0].ID << " | " << board[0][1].ID << " | " << board[0][2].ID <<
               " | " << board[0][3].ID << " | " << board[0][4].ID << " | " << board[0][5].ID <<
@@ -125,7 +136,7 @@ void showBoard(piece board[][8]) {
               << std::endl;
 }
 
-bool validPiece(const std::string& piece, const player& current, struct piece board[][8]) {
+bool validPiece(const std::string& piece, const player& current) {
     if (piece.length() != 3) return false;
     if (piece[1] > 'H' || piece[1] < 'A') return false;
     if (piece[2] > '8' || piece[2] < '1') return false;
@@ -137,7 +148,7 @@ bool validPiece(const std::string& piece, const player& current, struct piece bo
     return true;
 }
 
-bool validMove(const std::string& move, const player& current, struct piece board[][8], int curRow, int curCol) {
+bool validMove(const std::string& move, const player& current, int curRow, int curCol) {
     if (move.length() != 2) return false;
     if (move[0] > 'H' || move[0] < 'A') return false;
     if (move[1] > '8' || move[1] < '1') return false;
@@ -245,14 +256,41 @@ bool canMove(int row, int col) {
     return true;
 }
 
-void move(player &current, piece board[][8]) {
+void boardUpdate(int curRow, int curCol, int targRow, int targCol) {
+    board[targRow][targCol] = board[curRow][curCol];
+    board[curRow][curCol].ID = ' ';
+    board[curRow][curCol].color = " ";
+    board[curRow][curCol].canDoubleMove = false;
+}
+
+bool checkDraw(const player& current) {
+    if (moves2[boardState] > 2) return true;
+    // if threefold repetition has occured
+
+    if (current.strength == 0) return true;
+    // player only has king left
+
+    if (current.pCount == 0 && (current.strength == 3 || current.strength == 3.5 || current.strength == 6)) return true;
+    // player only has king + knight / king + bishop + king + 2 knights
+
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            if (board[i][j].color == current.color && board[i][j].ID != ' ' && canMove(i, j)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void move(player &current) {
     std::string inputPiece, inputMove;
     std::cout << current.color << "'s turn to move. " <<
     "Please specify the piece you wish to move and it's location (PE1 for pawn E1).\n";
 
     pieceSelect:
     std::cin >> inputPiece;
-    if (!validPiece(inputPiece, current, board)) {
+    if (!validPiece(inputPiece, current)) {
         std::cout << "Invalid input/piece is unable to move, please input the piece you wish to move again.\n";
         goto pieceSelect;
     }
@@ -261,7 +299,7 @@ void move(player &current, piece board[][8]) {
 
     pieceMove:
     std::cin >> inputMove;
-    if (!validMove(inputMove, current, board, curRow, curCol)) {
+    if (!validMove(inputMove, current, curRow, curCol)) {
         std::cout << "Invalid input/piece can not move there, please input where you would like to move again.\n";
         goto pieceMove;
     }
@@ -298,23 +336,20 @@ void move(player &current, piece board[][8]) {
         }
     }
     // check if a piece was taken
-}
 
-bool checkStalemate(const player& current, piece board[][8]) {
-    if (current.strength == 0) return true;
-    // player only has king left
-
-    if (current.pCount == 0 && (current.strength == 3 || current.strength == 3.5 || current.strength == 6)) return true;
-    // player only has king + knight / king + bishop + king + 2 knights
-
+    boardUpdate(curRow, curCol, targRow, targCol);
+    int index = 0;
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
-            if (board[i][j].color == current.color && board[i][j].ID != ' ' && canMove(i, j)) {
-                return false;
-            }
+            boardState[index] = board[i][j].ID;
+            index++;
         }
     }
-    return true;
+    moves2[boardState]++;
+    if (checkDraw(current)) {
+        gameOver = true;
+        return;
+    }
 }
 
 #endif //CHESS_CHESS_H

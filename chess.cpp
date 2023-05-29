@@ -1,18 +1,15 @@
 #include <iostream>
 #include "chess.h"
 
-bool gameOver = false;
-
-
 int main() {
     gameloop:
 
-    boardSetup(theBoard);
-    showBoard(theBoard);
+    boardSetup();
+    showBoard();
     gameOver = false;
 
     while (!gameOver) {
-        move(white, theBoard);
+        move(white);
     }
 /*
     std::cout << "Do you wish to play again? Y/N";
