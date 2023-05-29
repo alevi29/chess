@@ -100,39 +100,40 @@ void boardSetup() {
 }
 
 void showBoard() {
-    std::cout << "---------------------------------\n" <<
+    std::cout << "---------------------------------\n"<<
               "| " << board[0][0].ID << " | " << board[0][1].ID << " | " << board[0][2].ID <<
               " | " << board[0][3].ID << " | " << board[0][4].ID << " | " << board[0][5].ID <<
-              " | " << board[0][6].ID << " | " << board[0][7].ID << " |\n" <<
+              " | " << board[0][6].ID << " | " << board[0][7].ID << " | 8 \n" <<
               "---------------------------------\n" <<
               "| " << board[1][0].ID << " | " << board[1][1].ID << " | " << board[1][2].ID <<
               " | " << board[1][3].ID << " | " << board[1][4].ID << " | " << board[1][5].ID <<
-              " | " << board[1][6].ID << " | " << board[1][7].ID << " |\n" <<
+              " | " << board[1][6].ID << " | " << board[1][7].ID << " | 7 \n" <<
               "---------------------------------\n" <<
               "| " << board[2][0].ID << " | " << board[2][1].ID << " | " << board[2][2].ID <<
               " | " << board[2][3].ID << " | " << board[2][4].ID << " | " << board[2][5].ID <<
-              " | " << board[2][6].ID << " | " << board[2][7].ID << " |\n" <<
+              " | " << board[2][6].ID << " | " << board[2][7].ID << " | 6 \n" <<
               "---------------------------------\n" <<
               "| " << board[3][0].ID << " | " << board[3][1].ID << " | " << board[3][2].ID <<
               " | " << board[3][3].ID << " | " << board[3][4].ID << " | " << board[3][5].ID <<
-              " | " << board[3][6].ID << " | " << board[3][7].ID << " |\n" <<
+              " | " << board[3][6].ID << " | " << board[3][7].ID << " | 5 \n" <<
               "---------------------------------\n" <<
               "| " << board[4][0].ID << " | " << board[4][1].ID << " | " << board[4][2].ID <<
               " | " << board[4][3].ID << " | " << board[4][4].ID << " | " << board[4][5].ID <<
-              " | " << board[4][6].ID << " | " << board[4][7].ID << " |\n" <<
+              " | " << board[4][6].ID << " | " << board[4][7].ID << " | 4 \n" <<
               "---------------------------------\n" <<
               "| " << board[5][0].ID << " | " << board[5][1].ID << " | " << board[5][2].ID <<
               " | " << board[5][3].ID << " | " << board[5][4].ID << " | " << board[5][5].ID <<
-              " | " << board[5][6].ID << " | " << board[5][7].ID << " |\n" <<
+              " | " << board[5][6].ID << " | " << board[5][7].ID << " | 3 \n" <<
               "---------------------------------\n" <<
               "| " << board[6][0].ID << " | " << board[6][1].ID << " | " << board[6][2].ID <<
               " | " << board[6][3].ID << " | " << board[6][4].ID << " | " << board[6][5].ID <<
-              " | " << board[6][6].ID << " | " << board[6][7].ID << " |\n" <<
+              " | " << board[6][6].ID << " | " << board[6][7].ID << " | 2 \n" <<
               "---------------------------------\n" <<
               "| " << board[7][0].ID << " | " << board[7][1].ID << " | " << board[7][2].ID <<
               " | " << board[7][3].ID << " | " << board[7][4].ID << " | " << board[7][5].ID <<
-              " | " << board[7][6].ID << " | " << board[7][7].ID << " |\n" <<
-              "---------------------------------\n"
+              " | " << board[7][6].ID << " | " << board[7][7].ID << " | 1 \n" <<
+              "---------------------------------\n" <<
+              "  A   B   C   D   E   F   G   H\n"
               << std::endl;
 }
 
@@ -169,7 +170,7 @@ bool validMove(const std::string& move, const player& current, int curRow, int c
 
             if (currentPiece.canDoubleMove) {
                 if (curCol == targCol && current.color == "White" ? targRow - curRow < 0 && curRow - targRow < 3
-                : targCol - curCol < 0 && targRow - curRow < 3) {
+                : curRow - targRow < 0 && targRow - curRow < 3) {
                     if (current.color == "White" ? targRow - curRow == -2 : targRow - curRow == 2) currentPiece.canDoubleMove = false;
                     return true;
                 }
