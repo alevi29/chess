@@ -3,4 +3,4 @@ project(chess)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(chess chess.cpp chess.h)
+add_executable(chess chess.cpp chess.h ConsoleColor.h)

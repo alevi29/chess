@@ -10,9 +10,7 @@ int main() {
 
     while (!gameOver) {
         move(white);
-        showBoard();
         move(black);
-        showBoard();
     }
 /*
     std::cout << "Do you wish to play again? Y/N";

@@ -5,11 +5,14 @@
 #include <string>
 #include <cmath>
 #include <unordered_map>
+#include "ConsoleColor.h"
 
 #define BCONT 0
 #define WCONT 1
 #define BWCONT 2
 #define FREE 3
+#define TXT (board[i][j].color == "White" ? whiteColor : green)
+#define WC whiteColor
 
 // definitions for control board
 
@@ -100,8 +103,20 @@ void boardSetup() {
 }
 
 void showBoard() {
+    for (int i = 0; i < 8; ++i) {
+        std::cout << "---------------------------------\n";
+        std::cout << "|";
+        for (int j = 0; j < 8; ++j) {
+            std::cout << " " << TXT << board[i][j].ID << " " << WC << "|";
+        }
+        std::cout << " " << abs(i - 8) << std::endl;
+    }
+    std::cout
+    << "---------------------------------\n"
+    << "  A   B   C   D   E   F   G   H\n" << std::endl;;
+    /*
     std::cout << "---------------------------------\n"<<
-              "| " << board[0][0].ID << " | " << board[0][1].ID << " | " << board[0][2].ID <<
+              "| " << TXT << board[0][0].ID << WC << " | " << board[0][1].ID << " | " << board[0][2].ID <<
               " | " << board[0][3].ID << " | " << board[0][4].ID << " | " << board[0][5].ID <<
               " | " << board[0][6].ID << " | " << board[0][7].ID << " | 8 \n" <<
               "---------------------------------\n" <<
@@ -135,6 +150,7 @@ void showBoard() {
               "---------------------------------\n" <<
               "  A   B   C   D   E   F   G   H\n"
               << std::endl;
+              */
 }
 
 bool validPiece(const std::string& piece, const player& current) {
@@ -265,14 +281,18 @@ void boardUpdate(int curRow, int curCol, int targRow, int targCol) {
 }
 
 bool checkDraw(const player& current) {
-    if (moves2[boardState] > 2) return true;
+    if (moves2[boardState] > 2) {
+        std::cout << "Draw by threefold repetition.";
+        return true;
+    }
     // if threefold repetition has occured
 
-    if (current.strength == 0) return true;
-    // player only has king left
+    if (white.strength == 0 && black.strength == 0) return true;
+    // players only have king left
 
-    if (current.pCount == 0 && (current.strength == 3 || current.strength == 3.5 || current.strength == 6)) return true;
-    // player only has king + knight / king + bishop + king + 2 knights
+    if (white.pCount == 0 && (white.strength == 3 || white.strength == 3.5 || white.strength == 6) &&
+        black.pCount == 0 && (black.strength == 3 || black.strength == 3.5 || black.strength == 6)) return true;
+    // players only have king + knight / king + bishop + king + 2 knights
 
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
@@ -339,6 +359,7 @@ void move(player &current) {
     // check if a piece was taken
 
     boardUpdate(curRow, curCol, targRow, targCol);
+    showBoard();
     int index = 0;
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
@@ -347,7 +368,7 @@ void move(player &current) {
         }
     }
     moves2[boardState]++;
-    if (checkDraw(current)) {
+    if (checkDraw(current.color == "White" ? black : white)) {
         gameOver = true;
         return;
     }
