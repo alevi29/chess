@@ -40,6 +40,7 @@ std::stack<std::string> moves;
 std::unordered_map <std::string , int> moves2;
 std::string boardState;
 piece board[8][8], cBoard[8][8];
+bool padBoard[12][12];
 bool gameOver = false;
 
 struct player {
@@ -100,6 +101,12 @@ void boardSetup() {
         }
     }
     moves2[boardState]++;
+    for (int i = 0; i < 12; ++i) {
+        for (int j = 0; j < 12; ++j) {
+            if (i < 5 || i > 10 || j < 3 || j > 9) padBoard[i][j] = true;
+            else padBoard[i][j] = false;
+        }
+    }
 }
 
 void showBoard() {
@@ -114,43 +121,6 @@ void showBoard() {
     std::cout
     << "---------------------------------\n"
     << "  A   B   C   D   E   F   G   H\n" << std::endl;;
-    /*
-    std::cout << "---------------------------------\n"<<
-              "| " << TXT << board[0][0].ID << WC << " | " << board[0][1].ID << " | " << board[0][2].ID <<
-              " | " << board[0][3].ID << " | " << board[0][4].ID << " | " << board[0][5].ID <<
-              " | " << board[0][6].ID << " | " << board[0][7].ID << " | 8 \n" <<
-              "---------------------------------\n" <<
-              "| " << board[1][0].ID << " | " << board[1][1].ID << " | " << board[1][2].ID <<
-              " | " << board[1][3].ID << " | " << board[1][4].ID << " | " << board[1][5].ID <<
-              " | " << board[1][6].ID << " | " << board[1][7].ID << " | 7 \n" <<
-              "---------------------------------\n" <<
-              "| " << board[2][0].ID << " | " << board[2][1].ID << " | " << board[2][2].ID <<
-              " | " << board[2][3].ID << " | " << board[2][4].ID << " | " << board[2][5].ID <<
-              " | " << board[2][6].ID << " | " << board[2][7].ID << " | 6 \n" <<
-              "---------------------------------\n" <<
-              "| " << board[3][0].ID << " | " << board[3][1].ID << " | " << board[3][2].ID <<
-              " | " << board[3][3].ID << " | " << board[3][4].ID << " | " << board[3][5].ID <<
-              " | " << board[3][6].ID << " | " << board[3][7].ID << " | 5 \n" <<
-              "---------------------------------\n" <<
-              "| " << board[4][0].ID << " | " << board[4][1].ID << " | " << board[4][2].ID <<
-              " | " << board[4][3].ID << " | " << board[4][4].ID << " | " << board[4][5].ID <<
-              " | " << board[4][6].ID << " | " << board[4][7].ID << " | 4 \n" <<
-              "---------------------------------\n" <<
-              "| " << board[5][0].ID << " | " << board[5][1].ID << " | " << board[5][2].ID <<
-              " | " << board[5][3].ID << " | " << board[5][4].ID << " | " << board[5][5].ID <<
-              " | " << board[5][6].ID << " | " << board[5][7].ID << " | 3 \n" <<
-              "---------------------------------\n" <<
-              "| " << board[6][0].ID << " | " << board[6][1].ID << " | " << board[6][2].ID <<
-              " | " << board[6][3].ID << " | " << board[6][4].ID << " | " << board[6][5].ID <<
-              " | " << board[6][6].ID << " | " << board[6][7].ID << " | 2 \n" <<
-              "---------------------------------\n" <<
-              "| " << board[7][0].ID << " | " << board[7][1].ID << " | " << board[7][2].ID <<
-              " | " << board[7][3].ID << " | " << board[7][4].ID << " | " << board[7][5].ID <<
-              " | " << board[7][6].ID << " | " << board[7][7].ID << " | 1 \n" <<
-              "---------------------------------\n" <<
-              "  A   B   C   D   E   F   G   H\n"
-              << std::endl;
-              */
 }
 
 bool validPiece(const std::string& piece, const player& current) {
@@ -199,7 +169,17 @@ bool validMove(const std::string& move, const player& current, int curRow, int c
                     current.color == "White" ? targRow == curRow - 1 && move[1] == moves.top()[4] + 1
                     : targRow == curRow + 1 && move[1] == moves.top()[4] - 1) {
                     if (moves.top()[0] == 'P' && current.color == "White" ? moves.top()[2] == '7' && moves.top()[4] == '5'
-                        : moves.top()[2] == '2' && moves.top()[4] == '4') return true;
+                        : moves.top()[2] == '2' && moves.top()[4] == '4') {
+                        if (current.color == "White") {
+                            board[targRow + 1][targCol].ID = ' ';
+                            board[targRow + 1][targCol].color = " ";
+                        }
+                        else {
+                            board[targRow - 1][targCol].ID = ' ';
+                            board[targRow - 1][targCol].color = " ";
+                        }
+                        return true;
+                    }
                     return false;
                 }
                 // check for en passant
@@ -269,8 +249,51 @@ std::string checkPiece(const char& curPiece) {
     return piece;
 }
 
-bool canMove(int row, int col) {
-    return true;
+bool canMove(int row, int col, const player& current) {
+    switch (board[row][col].ID) {
+        case 'P':
+            if (current.color == "White") {
+                if (board[row - 1][col].ID == ' ') return true;
+                if (col == 7) {
+                    return board[row - 1][col - 1].ID != ' ' && board[row - 1][col - 1].color != current.color;
+                }
+                else if (col == 0) {
+                    return board[row - 1][col + 1].ID != ' ' && board[row - 1][col + 1].color != current.color;
+                 }
+                else {
+                    return board[row - 1][col - 1].ID != ' ' && board[row - 1][col - 1].color != current.color
+                            || board[row - 1][col + 1].ID != ' ' && board[row - 1][col + 1].color != current.color;
+                }
+            }
+            else {
+                if (board[row + 1][col].ID == ' ') return true;
+                if (col == 7) {
+                    return board[row + 1][col - 1].ID != ' ' && board[row - 1][col - 1].color != current.color;
+                }
+                else if (col == 0) {
+                    return board[row + 1][col + 1].ID != ' ' && board[row - 1][col + 1].color != current.color;
+                }
+                else {
+                    return board[row + 1][col - 1].ID != ' ' && board[row - 1][col - 1].color != current.color
+                           || board[row + 1][col + 1].ID != ' ' && board[row - 1][col + 1].color != current.color;
+                }
+            }
+        case 'R':
+            return !padBoard[row][col + 1] || !padBoard[row][col - 1] || !padBoard[row + 1][col] || !padBoard[row - 1][col];
+        case 'n':
+            return !padBoard[row + 1][col + 2] || !padBoard[row + 1][col - 2] ||
+                    !padBoard[row + 2][col + 1] || !padBoard[row + 2][col - 1] ||
+                    !padBoard[row - 1][col + 2] || !padBoard[row - 1][col - 2] ||
+                    !padBoard[row - 2][col + 1] || !padBoard[row - 2][col - 1];
+        case 'B':
+            return !padBoard[row + 1][col + 1] || !padBoard[row + 1][col - 1]
+                    || !padBoard[row - 1][col + 1] || !padBoard[row - 1][col - 1];
+        default:
+            return !padBoard[row + 1][col + 1] || !padBoard[row + 1][col - 1] ||
+                    !padBoard[row - 1][col + 1] || !padBoard[row - 1][col - 1] ||
+                    !padBoard[row][col + 1] || !padBoard[row][col - 1] ||
+                    !padBoard[row + 1][col] || !padBoard[row - 1][col];
+    }
 }
 
 void boardUpdate(int curRow, int curCol, int targRow, int targCol) {
@@ -278,6 +301,9 @@ void boardUpdate(int curRow, int curCol, int targRow, int targCol) {
     board[curRow][curCol].ID = ' ';
     board[curRow][curCol].color = " ";
     board[curRow][curCol].canDoubleMove = false;
+
+    padBoard[curRow][curCol] = false;
+    padBoard[targRow][targCol] = true;
 }
 
 bool checkDraw(const player& current) {
@@ -296,30 +322,33 @@ bool checkDraw(const player& current) {
 
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
-            if (board[i][j].color == current.color && board[i][j].ID != ' ' && canMove(i, j)) {
+            if (board[i][j].color == current.color && board[i][j].ID != ' ' && canMove(i, j, current)) {
                 return false;
             }
         }
     }
+    // if no pieces can move
+
     return true;
 }
 
 void move(player &current) {
     std::string inputPiece, inputMove;
-    std::cout << current.color << "'s turn to move. " <<
-    "Please specify the piece you wish to move and it's location (PE1 for pawn E1).\n";
-
-    pieceSelect:
+    std::cout << current.color << "'s turn to move. ";
+    reSelect:
+    std::cout << "Input the piece you wish to move and it's location (PE1: pawn E1)\n";
     std::cin >> inputPiece;
+    pieceSelect:
     if (!validPiece(inputPiece, current)) {
         std::cout << "Invalid input/piece is unable to move, please input the piece you wish to move again.\n";
         goto pieceSelect;
     }
     int curRow = abs(inputPiece[2] - 56), curCol = inputPiece[1] - 65;
     std::cout << "Please specify where you would like to move your " << checkPiece(inputPiece[0]) << " (D4 to move to D4).\n";
-
+    std::cout << "If you would like to select a different piece, type ""ESC""\n";
     pieceMove:
     std::cin >> inputMove;
+    if (inputMove == "ESC") goto reSelect;
     if (!validMove(inputMove, current, curRow, curCol)) {
         std::cout << "Invalid input/piece can not move there, please input where you would like to move again.\n";
         goto pieceMove;
