@@ -110,7 +110,7 @@ void boardSetup() {
     moves2[boardState]++;
     for (int i = 0; i < 12; ++i) {
         for (int j = 0; j < 12; ++j) {
-            if (i < 5 || i > 10 || j < 3 || j > 9) padBoard[i][j] = true;
+            if (i < 5 || i > 7 || j < 3 || j > 9) padBoard[i][j] = true;
             else padBoard[i][j] = false;
         }
     }
@@ -336,9 +336,10 @@ void boardUpdate(int curRow, int curCol, int targRow, int targCol) {
     padBoard[curRow + 2][curCol + 2] = false;
     padBoard[targRow + 2][targCol + 2] = true;
 
-    /*
-        implement part that updates cBoard, if king is controlled by a piece, set isAttackingKing to be true
-    */
+}
+
+void cBoardUpdate() {
+    // implement cBoard
 }
 
 bool checkDraw(const player& current) {
@@ -422,11 +423,12 @@ void move(player &current) {
     std::cout << current.color << "'s turn to move. ";
     reSelect:
     std::cout << "Input the piece you wish to move and it's location (PE1: pawn E1)\n";
+
+    pieceSelect:
     std::cin >> inputPiece;
 
     int curRow = abs(inputPiece[2] - 56), curCol = inputPiece[1] - 65;
 
-    pieceSelect:
     if (!validPiece(inputPiece, current) || !canMove(curRow, curCol, current)) {
         std::cout << "Invalid input/piece is unable to move, please input the piece you wish to move again.\n";
         goto pieceSelect;
