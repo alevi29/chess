@@ -33,13 +33,14 @@ relative piece strengths:
 struct piece {
     char ID;
     std::string color = " ";
-    bool canDoubleMove;
+    bool canDoubleMove, isAttackingKing = false;
 };
 
 std::stack<std::string> moves;
 std::unordered_map <std::string , int> moves2;
 std::string boardState;
-piece board[8][8], cBoard[8][8];
+piece board[8][8], simBoard[8][8];
+int cBoard[12][12];
 bool padBoard[12][12];
 bool gameOver = false;
 
@@ -94,6 +95,12 @@ void boardSetup() {
     board[0][4].ID = 'K';
     board[7][3].ID = 'Q';
     board[7][4].ID = 'K';
+
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            simBoard[i][j] = board[i][j];
+        }
+    }
 
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
@@ -279,20 +286,41 @@ bool canMove(int row, int col, const player& current) {
                 }
             }
         case 'R':
-            return !padBoard[row][col + 1] || !padBoard[row][col - 1] || !padBoard[row + 1][col] || !padBoard[row - 1][col];
+            return !padBoard[row + 2][col + 3] || !padBoard[row + 2][col + 1] || !padBoard[row + 3][col + 2] || !padBoard[row + 1][col + 2];
         case 'n':
-            return !padBoard[row + 1][col + 2] || !padBoard[row + 1][col - 2] ||
-                    !padBoard[row + 2][col + 1] || !padBoard[row + 2][col - 1] ||
-                    !padBoard[row - 1][col + 2] || !padBoard[row - 1][col - 2] ||
-                    !padBoard[row - 2][col + 1] || !padBoard[row - 2][col - 1];
+            return !padBoard[row + 3][col + 4] || !padBoard[row + 3][col] ||
+                    !padBoard[row + 4][col + 3] || !padBoard[row + 4][col + 1] ||
+                    !padBoard[row + 1][col + 4] || !padBoard[row + 1][col] ||
+                    !padBoard[row][col + 3] || !padBoard[row][col + 1];
         case 'B':
-            return !padBoard[row + 1][col + 1] || !padBoard[row + 1][col - 1]
-                    || !padBoard[row - 1][col + 1] || !padBoard[row - 1][col - 1];
+            return !padBoard[row + 3][col + 3] || !padBoard[row + 3][col + 1]
+                    || !padBoard[row + 1][col + 3] || !padBoard[row + 1][col + 1];
+        case 'Q':
+            return !padBoard[row + 3][col + 3] || !padBoard[row + 3][col + 1] ||
+                    !padBoard[row + 1][col + 3] || !padBoard[row + 1][col + 1] ||
+                    !padBoard[row + 2][col + 3] || !padBoard[row + 2][col + 1] ||
+                    !padBoard[row + 3][col + 2] || !padBoard[row + 1][col + 2];
         default:
-            return !padBoard[row + 1][col + 1] || !padBoard[row + 1][col - 1] ||
-                    !padBoard[row - 1][col + 1] || !padBoard[row - 1][col - 1] ||
-                    !padBoard[row][col + 1] || !padBoard[row][col - 1] ||
-                    !padBoard[row + 1][col] || !padBoard[row - 1][col];
+            if (current.color == "White") {
+                return (!padBoard[row + 3][col + 3] && (cBoard[row + 3][col + 3] == WCONT || cBoard[row + 3][col + 3] == FREE)
+                || (!padBoard[row + 3][col + 1] && cBoard[row + 3][col + 1] == WCONT || cBoard[row + 3][col + 1] == FREE)
+                || (!padBoard[row + 1][col + 3] && cBoard[row + 1][col + 3] == WCONT || cBoard[row + 1][col + 3] == FREE)
+                || (!padBoard[row + 1][col + 1] && cBoard[row + 1][col + 1] == WCONT || cBoard[row + 1][col + 1] == FREE)
+                || (!padBoard[row + 2][col + 3] && cBoard[row + 2][col + 3] == WCONT || cBoard[row + 2][col + 3] == FREE)
+                || (!padBoard[row + 2][col + 1] && cBoard[row + 2][col + 1] == WCONT || cBoard[row + 2][col + 1] == FREE)
+                || (!padBoard[row + 3][col + 2] && cBoard[row + 3][col + 2] == WCONT || cBoard[row + 3][col + 2] == FREE)
+                || (!padBoard[row + 1][col + 2] && cBoard[row + 1][col + 2] == WCONT || cBoard[row + 1][col + 2] == FREE));
+            }
+            else {
+                return (!padBoard[row + 3][col + 3] && (cBoard[row + 3][col + 3] == BCONT || cBoard[row + 3][col + 3] == FREE)
+                || (!padBoard[row + 3][col + 1] && cBoard[row + 3][col + 1] == BCONT || cBoard[row + 3][col + 1] == FREE)
+                || (!padBoard[row + 1][col + 3] && cBoard[row + 1][col + 3] == BCONT || cBoard[row + 1][col + 3] == FREE)
+                || (!padBoard[row + 1][col + 1] && cBoard[row + 1][col + 1] == BCONT || cBoard[row + 1][col + 1] == FREE)
+                || (!padBoard[row + 2][col + 3] && cBoard[row + 2][col + 3] == BCONT || cBoard[row + 2][col + 3] == FREE)
+                || (!padBoard[row + 2][col + 1] && cBoard[row + 2][col + 1] == BCONT || cBoard[row + 2][col + 1] == FREE)
+                || (!padBoard[row + 3][col + 2] && cBoard[row + 3][col + 2] == BCONT || cBoard[row + 3][col + 2] == FREE)
+                || (!padBoard[row + 1][col + 2] && cBoard[row + 1][col + 2] == BCONT || cBoard[row + 1][col + 2] == FREE));
+            }
     }
 }
 
@@ -302,22 +330,35 @@ void boardUpdate(int curRow, int curCol, int targRow, int targCol) {
     board[curRow][curCol].color = " ";
     board[curRow][curCol].canDoubleMove = false;
 
-    padBoard[curRow][curCol] = false;
-    padBoard[targRow][targCol] = true;
+    simBoard[targRow][targCol] = board[targRow][targCol];
+    simBoard[curRow][curCol] = board[curRow][curCol];
+
+    padBoard[curRow + 2][curCol + 2] = false;
+    padBoard[targRow + 2][targCol + 2] = true;
+
+    /*
+        implement part that updates cBoard, if king is controlled by a piece, set isAttackingKing to be true
+    */
 }
 
 bool checkDraw(const player& current) {
     if (moves2[boardState] > 2) {
-        std::cout << "Draw by threefold repetition.";
+        std::cout << "Draw by threefold repetition.\n";
         return true;
     }
     // if threefold repetition has occured
 
-    if (white.strength == 0 && black.strength == 0) return true;
+    if (white.strength == 0 && black.strength == 0) {
+        std::cout << "Draw by insufficient material\n";
+        return true;
+    }
     // players only have king left
 
     if (white.pCount == 0 && (white.strength == 3 || white.strength == 3.5 || white.strength == 6) &&
-        black.pCount == 0 && (black.strength == 3 || black.strength == 3.5 || black.strength == 6)) return true;
+        black.pCount == 0 && (black.strength == 3 || black.strength == 3.5 || black.strength == 6)) {
+        std::cout << "Draw by insufficient material\n";
+        return true;
+    }
     // players only have king + knight / king + bishop + king + 2 knights
 
     for (int i = 0; i < 8; ++i) {
@@ -328,7 +369,51 @@ bool checkDraw(const player& current) {
         }
     }
     // if no pieces can move
+    std::cout << "No pieces are able to move. The game ends in a draw.\n";
+    return true;
+}
 
+bool inCheck(const player& current) {
+    int king = cBoard[current.KY + 2][current.KX + 2];
+    if (king == BWCONT || current.color == "White" ? king == BCONT : king == WCONT) {
+        return true;
+    }
+    return false;
+}
+
+bool checkmate(const player& current) { // checked for at end of current players turn
+    if (!inCheck(black) && !inCheck(white)) return false;
+    // not checkmate if neither player is in check
+
+    if (canMove(white.KY, white.KX, white) && canMove(black.KY, black.KX, black)) return false;
+    // not checkmate if both kings are able to move
+
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            if (board[i][j].isAttackingKing) {
+                if (cBoard[i + 2][j + 2] == FREE || current.color == "White" ? cBoard[i + 2][j + 2] == WCONT : cBoard[i][j] == BCONT) return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool simMove(const player& current, int curRow, int curCol, int targRow, int targCol) {
+    simBoard[targRow][targCol] = simBoard[curRow][curCol];
+    simBoard[curRow][curCol].ID = ' ';
+    simBoard[curRow][curCol].color = " ";
+    simBoard[curRow][curCol].canDoubleMove = false;
+    /*
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            if (simBoard[i][j].color == (current.color == "White" ? "Black" : "White")) {
+                switch (simBoard[i][j].ID) {
+                    // *** TO DO ***
+                }
+            }
+        }
+    }
+     */
     return true;
 }
 
@@ -338,14 +423,19 @@ void move(player &current) {
     reSelect:
     std::cout << "Input the piece you wish to move and it's location (PE1: pawn E1)\n";
     std::cin >> inputPiece;
+
+    int curRow = abs(inputPiece[2] - 56), curCol = inputPiece[1] - 65;
+
     pieceSelect:
-    if (!validPiece(inputPiece, current)) {
+    if (!validPiece(inputPiece, current) || !canMove(curRow, curCol, current)) {
         std::cout << "Invalid input/piece is unable to move, please input the piece you wish to move again.\n";
         goto pieceSelect;
     }
-    int curRow = abs(inputPiece[2] - 56), curCol = inputPiece[1] - 65;
+
+    remove:
     std::cout << "Please specify where you would like to move your " << checkPiece(inputPiece[0]) << " (D4 to move to D4).\n";
     std::cout << "If you would like to select a different piece, type ""ESC""\n";
+
     pieceMove:
     std::cin >> inputMove;
     if (inputMove == "ESC") goto reSelect;
@@ -355,6 +445,12 @@ void move(player &current) {
     }
     int targRow = abs(inputMove[1] - 56), targCol = inputMove[0] - 65;
 
+    if (!simMove(current, curRow, curCol, targRow, targCol)) {
+        std::cout << "Invalid move.\n";
+        goto remove;
+    }
+    // if move would put player in check or player is already in check
+
     std::string move = inputPiece + inputMove;
     moves.push(move); // add current move to the stack
 
@@ -362,7 +458,8 @@ void move(player &current) {
     if (board[curRow][curCol].ID == 'K') {
         current.KX = targCol;
         current.KY = targRow;
-    } // if king was moved, update king coordinates
+        current.canCastle = false;
+    } // if king was moved, update king coordinates and set canCastle to false
 
     if (board[targRow][targCol].ID != ' ') {
         switch (board[targRow][targCol].ID) {
@@ -389,6 +486,8 @@ void move(player &current) {
 
     boardUpdate(curRow, curCol, targRow, targCol);
     showBoard();
+    // update state of board arrays
+
     int index = 0;
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
@@ -397,7 +496,9 @@ void move(player &current) {
         }
     }
     moves2[boardState]++;
-    if (checkDraw(current.color == "White" ? black : white)) {
+    // updates moves2 which keeps track of all positions that showed up on the board
+
+    if (checkDraw(current.color == "White" ? black : white) || checkmate(current)) {
         gameOver = true;
         return;
     }
