@@ -405,15 +405,8 @@ bool simMove(const player& current, int curRow, int curCol, int targRow, int tar
     simBoard[curRow][curCol].color = " ";
     simBoard[curRow][curCol].canDoubleMove = false;
     /*
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
-            if (simBoard[i][j].color == (current.color == "White" ? "Black" : "White")) {
-                switch (simBoard[i][j].ID) {
-                    // *** TO DO ***
-                }
-            }
-        }
-    }
+     * implement portion which checks every square that opposing pieces control
+     * if opposing piece controls current player's king square, return false
      */
     return true;
 }
@@ -488,6 +481,7 @@ void move(player &current) {
 
     boardUpdate(curRow, curCol, targRow, targCol);
     showBoard();
+    cBoardUpdate();
     // update state of board arrays
 
     int index = 0;
