@@ -227,9 +227,10 @@ bool validMove(const std::string &move, int curRow, int curCol) {
 
         case 'B':
             if (abs(targRow - curRow) != abs(targCol - curCol)) return false;
-            for (int testRow = curRow < targRow ? curRow : targRow; testRow < curRow < targRow ? targRow : curRow; ++testRow) {
+            for (int testRow = curRow < targRow ? curRow : targRow; testRow < (curRow < targRow ? targRow : curRow); ++testRow) {
+                std::cout << testRow << ", " << testCol << std::endl;
                 if (board[testRow][testCol].ID != ' ') return false;
-                testCol = curCol < targCol ? testCol + 1 : testCol - 1;
+                testCol++;
             }
             return true;
 
@@ -336,6 +337,7 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                             if (curBoard[i - 1][j - 1].ID == 'K') curBoard[i][j].isAttackingKing = true;
                         }
                         break;
+
                     case 'R':
                         while (bCol < 7 && curBoard[bRow][++bCol].ID != ' ') {
                             cCol++;
@@ -367,6 +369,7 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                         }
                         cBoardCheck
                         // rook up movement
+                        break;
 
                     case 'n':
                         cRow -= 2, cCol += 1;
@@ -399,6 +402,7 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
 
                         cRow += 1, cCol -= 2;
                         cBoardCheck
+                        break;
 
                     case 'B':
                         while (bCol < 7 && bRow < 7 && curBoard[++bRow][++bCol].ID != ' ') {
@@ -427,9 +431,89 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                             cBoardCheck
                         }
                         cBoardCheck
+                        break;
 
                     case 'Q':
+                        while (bCol < 7 && curBoard[bRow][++bCol].ID != ' ') {
+                            cCol++;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
+                        // rook right movement
+
+                        while (bCol > 0 && curBoard[bRow][--bCol].ID != ' ') {
+                            cCol--;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        // rook left movement
+
+                        while (bRow < 7 && curBoard[++bRow][bCol].ID != ' ') {
+                            cRow++;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        // rook down movement
+
+                        while (bCol > 0 && curBoard[--bRow][bCol].ID != ' ') {
+                            cRow--;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        // rook up movement
+                        bRow = i - 2, bCol = j - 2, cRow = i, cCol = j;
+
+                        // horizontal/vertical movement
+
+                        while (bCol < 7 && bRow < 7 && curBoard[++bRow][++bCol].ID != ' ') {
+                            cCol++, cRow++;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
+
+                        while (bRow > 0 && bCol > 0 && curBoard[--bRow][--bCol].ID != ' ') {
+                            cCol--, cRow--;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+
+                        while (bRow < 7 && bCol > 0 && curBoard[++bRow][--bCol].ID != ' ') {
+                            cRow++, bCol--;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+
+                        while (bRow > 0 && bCol < 7 && curBoard[--bRow][++bCol].ID != ' ') {
+                            cRow--, cCol++;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        // diagonal movement
+                        break;
+
                     default:
+                        cRow--, cCol--;
+                        cBoardCheck
+                        cCol++;
+                        cBoardCheck
+                        cCol++;
+                        cBoardCheck
+                        cRow++;
+                        cBoardCheck
+                        cRow++;
+                        cBoardCheck
+                        cCol--;
+                        cBoardCheck
+                        cCol--;
+                        cBoardCheck
+                        cRow--;
+                        cBoardCheck
                         break;
                 }
             }
@@ -517,7 +601,7 @@ void boardSetup() {
     moves2[boardState]++;
     for (int i = 0; i < 12; ++i) {
         for (int j = 0; j < 12; ++j) {
-            if (i < 5 || i > 7 || j < 3 || j > 9) {
+            if (i < 4 || i > 7 || j < 2 || j > 9) {
                 padBoard[i][j] = true;
                 cBoard[i][j] = BWCONT;
                 cSimBoard[i][j] = BWCONT;
