@@ -20,7 +20,8 @@ else if (curCBoard[cRow][cCol] == BCONT) curCBoard[cRow][cCol] = BWCONT; \
 else {                                      \
 if (curCBoard[cRow][cCol] == FREE) curCBoard[cRow][cCol] = BCONT; \
 else if (curCBoard[cRow][cCol] == WCONT) curCBoard[cRow][cCol] = BWCONT; \
-}
+}                                           \
+if (curBoard[bRow][bCol].ID == 'K') curBoard[i][j].isAttackingKing = true;
 
 // definitions for control board
 
@@ -311,6 +312,7 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
     for (int i = 2; i < 10; ++i) {
         for (int j = 2; j < 10; ++j) {
             if (curBoard[i - 2][j - 2].ID != ' ') {
+
                 int bRow = i - 2, bCol = j - 2, cRow = i, cCol = j;
                 std::string color = curBoard[i - 2][j - 2].color;
                 char piece = curBoard[i - 2][j - 2].ID;
@@ -322,12 +324,16 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                             if (curCBoard[i - 1][j - 1] == BCONT) curCBoard[i - 1][j - 1] = BWCONT;
                             if (curCBoard[i - 1][j + 1] == FREE) curCBoard[i - 1][j + 1] = WCONT;
                             if (curCBoard[i - 1][j + 1] == BCONT) curCBoard[i - 1][j + 1] = BWCONT;
+                            if (curBoard[i - 3][j - 1].ID == 'K') curBoard[i][j].isAttackingKing = true;
+                            if (curBoard[i - 3][j - 1].ID == 'K') curBoard[i][j].isAttackingKing = true;
                         }
                         else {
-                            if (curCBoard[i - 1][j - 1] == FREE) curCBoard[i - 1][j - 1] = BCONT;
-                            if (curCBoard[i - 1][j - 1] == WCONT) curCBoard[i - 1][j - 1] = BWCONT;
-                            if (curCBoard[i - 1][j + 1] == FREE) curCBoard[i - 1][j + 1] = BCONT;
-                            if (curCBoard[i - 1][j + 1] == WCONT) curCBoard[i - 1][j + 1] = BWCONT;
+                            if (curCBoard[i + 1][j - 1] == FREE) curCBoard[i - 1][j - 1] = BCONT;
+                            if (curCBoard[i + 1][j - 1] == WCONT) curCBoard[i - 1][j - 1] = BWCONT;
+                            if (curCBoard[i + 1][j + 1] == FREE) curCBoard[i - 1][j + 1] = BCONT;
+                            if (curCBoard[i + 1][j + 1] == WCONT) curCBoard[i - 1][j + 1] = BWCONT;
+                            if (curBoard[i - 1][j - 3].ID == 'K') curBoard[i][j].isAttackingKing = true;
+                            if (curBoard[i - 1][j - 1].ID == 'K') curBoard[i][j].isAttackingKing = true;
                         }
                         break;
                     case 'R':
@@ -360,27 +366,68 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                             cBoardCheck
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
                         // rook up movement
 
                     case 'n':
                         cRow -= 2, cCol += 1;
                         cBoardCheck
+                        cRow = i, cCol = j;
+
                         cRow -= 2, cCol -= 1;
                         cBoardCheck
+                        cRow = i, cCol = j;
+
                         cRow += 2, cCol += 1;
                         cBoardCheck
+                        cRow = i, cCol = j;
+
                         cRow += 2, cCol -= 1;
                         cBoardCheck
+                        cRow = i, cCol = j;
+
                         cRow -= 1, cCol += 2;
                         cBoardCheck
+                        cRow = i, cCol = j;
+
                         cRow -= 1, cCol -= 2;
                         cBoardCheck
+                        cRow = i, cCol = j;
+
                         cRow += 1, cCol += 2;
                         cBoardCheck
+                        cRow = i, cCol = j;
+
                         cRow += 1, cCol -= 2;
                         cBoardCheck
+
                     case 'B':
+                        while (bCol < 7 && bRow < 7 && curBoard[++bRow][++bCol].ID != ' ') {
+                            cCol++, cRow++;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
+
+                        while (bRow > 0 && bCol > 0 && curBoard[--bRow][--bCol].ID != ' ') {
+                            cCol--, cRow--;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+
+                        while (bRow < 7 && bCol > 0 && curBoard[++bRow][--bCol].ID != ' ') {
+                            cRow++, bCol--;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+
+                        while (bRow > 0 && bCol < 7 && curBoard[--bRow][++bCol].ID != ' ') {
+                            cRow--, cCol++;
+                            cBoardCheck
+                        }
+                        cBoardCheck
+
                     case 'Q':
                     default:
                         break;
