@@ -12,14 +12,10 @@ int main() {
         move(white);
         move(black);
     }
-/*
+
     std::cout << "Do you wish to play again? Y/N";
     std::string response;
     std::cin >> response;
     if (response == "Y") goto gameloop;
-    else {
-
-    }
-    */
     return 0;
 }

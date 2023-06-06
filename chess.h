@@ -23,6 +23,8 @@ else if (curCBoard[cRow][cCol] == WCONT) curCBoard[cRow][cCol] = BWCONT; \
 }                                           \
 if (curBoard[bRow][bCol].ID == 'K') curBoard[i][j].isAttackingKing = true;
 
+// *** FIX MOVEMENT CHECKING FOR QUEEN/BISHOP ***
+
 // definitions for control board
 
 // *** create control board ***
@@ -157,7 +159,7 @@ bool validMove(const std::string &move, int curRow, int curCol) {
     // if target location is occupied by a piece of the same color
 
     piece currentPiece = board[curRow][curCol];
-    int testCol = curCol < targCol ? curCol : targCol;
+    int testCol = curCol;
     switch(currentPiece.ID) {
         case 'P':
             if ((current.color == "White" && (targCol == curCol + 1 || targCol == curCol - 1) && targRow == curRow - 1
@@ -227,10 +229,9 @@ bool validMove(const std::string &move, int curRow, int curCol) {
 
         case 'B':
             if (abs(targRow - curRow) != abs(targCol - curCol)) return false;
-            for (int testRow = curRow < targRow ? curRow : targRow; testRow < (curRow < targRow ? targRow : curRow); ++testRow) {
-                std::cout << testRow << ", " << testCol << std::endl;
-                if (board[testRow][testCol].ID != ' ') return false;
-                testCol++;
+            for (int testRow = curRow; curRow < targRow ? testRow <= targRow : testRow >= targRow; curRow < targRow ? testRow++ : testRow--) {
+                if (board[testRow][testCol].ID != ' ' && testRow != curRow) return false;
+                curCol < targCol ? testCol++ : testCol--;
             }
             return true;
 
@@ -277,9 +278,9 @@ bool validMove(const std::string &move, int curRow, int curCol) {
 
         case 'Q':
             if (abs(targRow - curRow) == abs(targCol - curCol)) {
-                for (int testRow = curRow < targRow ? curRow : targRow; testRow < curRow < targRow ? targRow : curRow; ++testRow) {
-                    if (board[testRow][testCol].ID != ' ') return false;
-                    testCol = curCol < targCol ? testCol + 1 : testCol - 1;
+                for (int testRow = curRow; curRow < targRow ? testRow <= targRow : testRow >= targRow; curRow < targRow ? testRow++ : testRow--) {
+                    if (board[testRow][testCol].ID != ' ' && testRow != curRow) return false;
+                    curCol < targCol ? testCol++ : testCol--;
                 }
             }
                 // diagonal movement check
@@ -289,7 +290,7 @@ bool validMove(const std::string &move, int curRow, int curCol) {
                 // non-horizontal/vertical movement
 
                 if (targCol == curCol) {
-                    for (int i = curRow < targRow ? curRow : targRow; i < curRow < targRow ? targRow : curRow; ++i) {
+                    for (int i = curRow < targRow ? curRow : targRow; i < (curRow < targRow ? targRow : curRow); ++i) {
                         if (board[i][targCol].ID != ' ') return false;
                     }
                     return true;
@@ -297,7 +298,7 @@ bool validMove(const std::string &move, int curRow, int curCol) {
                     // check for movement along a file
 
                 else {
-                    for (int i = curCol < targCol ? curCol : targCol; i < curCol < targCol ? targCol : curCol; ++i) {
+                    for (int i = curCol < targCol ? curCol : targCol; i < (curCol < targCol ? targCol : curCol); ++i) {
                         if (board[curRow][i].ID != ' ') return false;
                     }
                     return true;
@@ -310,8 +311,9 @@ bool validMove(const std::string &move, int curRow, int curCol) {
 }
 
 void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
-    for (int i = 2; i < 10; ++i) {
-        for (int j = 2; j < 10; ++j) {
+    int i, j;
+    for (i = 2; i < 10; ++i) {
+        for (j = 2; j < 10; ++j) {
             if (curBoard[i - 2][j - 2].ID != ' ') {
 
                 int bRow = i - 2, bCol = j - 2, cRow = i, cCol = j;
@@ -340,7 +342,7 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
 
                     case 'R':
                         cCol++;
-                        while (bCol < 7 && curBoard[bRow][++bCol].ID != ' ') {
+                        while (bCol < 7 && curBoard[bRow][++bCol].ID == ' ') {
                             cBoardCheck
                             cCol++;
                         }
@@ -349,25 +351,25 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                         // rook right movement
 
                         cCol--;
-                        while (bCol > 0 && curBoard[bRow][--bCol].ID != ' ') {
+                        while (bCol > 0 && curBoard[bRow][--bCol].ID == ' ') {
                             cBoardCheck
                             cCol--;
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
                         // rook left movement
 
                         cRow++;
-                        while (bRow < 7 && curBoard[++bRow][bCol].ID != ' ') {
+                        while (bRow < 7 && curBoard[++bRow][bCol].ID == ' ') {
                             cBoardCheck
                             cRow++;
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
                         // rook down movement
 
                         cRow--;
-                        while (bCol > 0 && curBoard[--bRow][bCol].ID != ' ') {
+                        while (bRow > 0 && curBoard[--bRow][bCol].ID == ' ') {
                             cBoardCheck
                             cRow--;
                         }
@@ -410,7 +412,7 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
 
                     case 'B':
                         cCol++, cRow++;
-                        while (bCol < 7 && bRow < 7 && curBoard[++bRow][++bCol].ID != ' ') {
+                        while (bCol < 7 && bRow < 7 && curBoard[++bRow][++bCol].ID == ' ') {
                             cBoardCheck
                             cCol++, cRow++;
                         }
@@ -418,23 +420,23 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                         bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
 
                         cCol--, cRow--;
-                        while (bRow > 0 && bCol > 0 && curBoard[--bRow][--bCol].ID != ' ') {
+                        while (bRow > 0 && bCol > 0 && curBoard[--bRow][--bCol].ID == ' ') {
                             cBoardCheck
                             cCol--, cRow--;
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
 
                         cRow++, cCol--;
-                        while (bRow < 7 && bCol > 0 && curBoard[++bRow][--bCol].ID != ' ') {
+                        while (bRow < 7 && bCol > 0 && curBoard[++bRow][--bCol].ID == ' ') {
                             cBoardCheck
                             cRow++, bCol--;
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
 
                         cRow--, cCol++;
-                        while (bRow > 0 && bCol < 7 && curBoard[--bRow][++bCol].ID != ' ') {
+                        while (bRow > 0 && bCol < 7 && curBoard[--bRow][++bCol].ID == ' ') {
                             cBoardCheck
                             cRow--, cCol++;
                         }
@@ -443,7 +445,7 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
 
                     case 'Q':
                         cCol++;
-                        while (bCol < 7 && curBoard[bRow][++bCol].ID != ' ') {
+                        while (bCol < 7 && curBoard[bRow][++bCol].ID == ' ') {
                             cBoardCheck
                             cCol++;
                         }
@@ -452,34 +454,35 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                         // rook right movement
 
                         cCol--;
-                        while (bCol > 0 && curBoard[bRow][--bCol].ID != ' ') {
+                        while (bCol > 0 && curBoard[bRow][--bCol].ID == ' ') {
                             cBoardCheck
                             cCol--;
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
                         // rook left movement
 
                         cRow++;
-                        while (bRow < 7 && curBoard[++bRow][bCol].ID != ' ') {
+                        while (bRow < 7 && curBoard[++bRow][bCol].ID == ' ') {
                             cBoardCheck
                             cRow++;
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
                         // rook down movement
 
                         cRow--;
-                        while (bCol > 0 && curBoard[--bRow][bCol].ID != ' ') {
+                        while (bRow > 0 && curBoard[--bRow][bCol].ID == ' ') {
                             cBoardCheck
                             cRow--;
                         }
                         cBoardCheck
+                        bRow = i - 2, bCol = j - 2, cRow = i, cCol = j;
                         // rook up movement
                         // horizontal/vertical movement
 
                         cCol++, cRow++;
-                        while (bCol < 7 && bRow < 7 && curBoard[++bRow][++bCol].ID != ' ') {
+                        while (bCol < 7 && bRow < 7 && curBoard[++bRow][++bCol].ID == ' ') {
                             cBoardCheck
                             cCol++, cRow++;
                         }
@@ -487,23 +490,23 @@ void cBoardUpdate(int curCBoard[12][12], piece curBoard[8][8]) {
                         bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
 
                         cCol--, cRow--;
-                        while (bRow > 0 && bCol > 0 && curBoard[--bRow][--bCol].ID != ' ') {
+                        while (bRow > 0 && bCol > 0 && curBoard[--bRow][--bCol].ID == ' ') {
                             cBoardCheck
                             cCol--, cRow--;
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
 
                         cRow++, cCol--;
-                        while (bRow < 7 && bCol > 0 && curBoard[++bRow][--bCol].ID != ' ') {
+                        while (bRow < 7 && bCol > 0 && curBoard[++bRow][--bCol].ID == ' ') {
                             cBoardCheck
                             cRow++, bCol--;
                         }
                         cBoardCheck
-                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;;
+                        bRow = i - 2; bCol = j - 2, cRow = i, cCol = j;
 
                         cRow--, cCol++;
-                        while (bRow > 0 && bCol < 7 && curBoard[--bRow][++bCol].ID != ' ') {
+                        while (bRow > 0 && bCol < 7 && curBoard[--bRow][++bCol].ID == ' ') {
                             cBoardCheck
                             cRow--, cCol++;
                         }
@@ -649,12 +652,14 @@ void showBoard() {
     std::cout
     << "---------------------------------\n"
     << "  A   B   C   D   E   F   G   H\n" << std::endl;
+
     for (int i = 2; i < 10; ++i) {
         for (int j = 2; j < 10; ++j) {
             std::cout << cBoard[i][j] << " ";
         }
         std::cout << "\n";
     }
+
 }
 
 std::string checkPiece(const char& curPiece) {
@@ -734,7 +739,10 @@ bool checkmate(const player& current) { // checked for at end of current players
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
             if (board[i][j].isAttackingKing) {
-                if (cBoard[i + 2][j + 2] == FREE || current.color == "White" ? cBoard[i + 2][j + 2] == WCONT : cBoard[i][j] == BCONT) return true;
+                if (cBoard[i + 2][j + 2] == FREE || current.color == "White" ? cBoard[i + 2][j + 2] == WCONT : cBoard[i][j] == BCONT) {
+                    std::cout << "Checkmate! The game is over.\n";
+                    return true;
+                }
             }
         }
     }
@@ -747,6 +755,11 @@ bool simMove(const player& current, int curRow, int curCol, int targRow, int tar
     simBoard[curRow][curCol].color = " ";
     simBoard[curRow][curCol].canDoubleMove = false;
     cBoardUpdate(cSimBoard, simBoard);
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            if (simBoard[i][j].color != current.color && simBoard[i][j].isAttackingKing) return false;
+        }
+    }
     return true;
 }
 
